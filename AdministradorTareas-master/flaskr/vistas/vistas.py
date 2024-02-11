@@ -1,7 +1,10 @@
 from flask import request
+# from modelos.modelos import db, Categoria, CategoriaSchema, Usuario, UsuarioSchema, Tarea, TareaSchema
 from ..modelos import db, Categoria, CategoriaSchema, Usuario, UsuarioSchema, Tarea, TareaSchema
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import jwt_required, create_access_token
+from datetime import datetime
 
 categoria_schema = CategoriaSchema()
 usuario_schema = UsuarioSchema()
@@ -38,6 +41,7 @@ class VistaCategoria(Resource):
 
 
 class VistaLogIn(Resource):
+    @jwt_required()
     def post(self):
             u_nombre = request.json["nombre"]
             u_contrasena = request.json["contrasena"]
@@ -50,9 +54,10 @@ class VistaLogIn(Resource):
 class VistaSignIn(Resource):
     def post(self):
         nuevo_usuario = Usuario(nombre=request.json["nombre"], contrasena=request.json["contrasena"], imagen=request.json["imagen"])
+        token_acceso = create_access_token(identity=request.json['nombre'])
         db.session.add(nuevo_usuario)
         db.session.commit()
-        return 'Usuario creado exitosamente', 201
+        return {"mensaje":"Usuario creado exitosamente", "token de acceso":token_acceso}
     
     def get(self):
         return [usuario_schema.dump(usr) for usr in Usuario.query.all()]
@@ -93,49 +98,30 @@ class VistaTarea(Resource):
     
 
 
-
-"""
-class VistaAlbumsUsuario(Resource):
-
+class VistaTareasUsuario(Resource):
+    @jwt_required()
     def post(self, id_usuario):
-        nuevo_album = Album(titulo=request.json["titulo"], anio=request.json["anio"], descripcion=request.json["descripcion"], medio=request.json["medio"])
+        nueva_tarea = Tarea(texto=request.json["texto"], fecha_inicio=datetime.now().date()
+            , fecha_fin=datetime.strptime(request.json["fecha_fin"], '%Y-%m-%d').date()
+            , estado=request.json["estado"], categoria=request.json["categoria"])
         usuario = Usuario.query.get_or_404(id_usuario)
-        usuario.albumes.append(nuevo_album)
-
+        usuario.tareas.append(nueva_tarea)
         try:
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            return 'El usuario ya tiene un album con dicho nombre',409
-
-        return album_schema.dump(nuevo_album)
-
+            return 'El usuario ya tiene una tarea con dicha descripción',409
+        return tarea_schema.dump(nueva_tarea)
+    
+    @jwt_required()
     def get(self, id_usuario):
         usuario = Usuario.query.get_or_404(id_usuario)
-        return [album_schema.dump(al) for al in usuario.albumes]
-
-class VistaCancionesAlbum(Resource):
-
-    def post(self, id_album):
-        album = Album.query.get_or_404(id_album)
-        
-        if "id_cancion" in request.json.keys():
-            
-            nueva_cancion = Cancion.query.get(request.json["id_cancion"])
-            if nueva_cancion is not None:
-                album.canciones.append(nueva_cancion)
-                db.session.commit()
-            else:
-                return 'Canción errónea',404
-        else: 
-            nueva_cancion = Cancion(titulo=request.json["titulo"], minutos=request.json["minutos"], segundos=request.json["segundos"], interprete=request.json["interprete"])
-            album.canciones.append(nueva_cancion)
-        db.session.commit()
-        return cancion_schema.dump(nueva_cancion)
-       
-    def get(self, id_album):
-        album = Album.query.get_or_404(id_album)
-        return [cancion_schema.dump(ca) for ca in album.canciones]
+        return [tarea_schema.dump(t) for t in usuario.tareas]
 
 
-"""
+class VistaTareasCategoria(Resource):
+    def get(self, id_categoria):
+        categoria = Categoria.query.get_or_404(id_categoria)
+        return [tarea_schema.dump(t) for t in categoria.tareas]
+
+

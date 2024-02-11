@@ -1,8 +1,10 @@
-from flaskr import create_app
+from .main import create_app
 from flask_restful import Api
+# from modelos import db
 from .modelos import db
-# from .vistas import VistaCanciones, VistaCancion, VistaSignIn, VistaLogIn, VistaAlbum, VistaAlbumsUsuario, VistaCancionesAlbum
-from .vistas import VistaCategoria, VistaCategorias, VistaLogIn, VistaSignIn, VistaTarea, VistaUsuario
+# from vistas import VistaCategoria, VistaCategorias, VistaLogIn, VistaSignIn, VistaTarea, VistaUsuario, VistaTareasUsuario, VistaTareasCategoria
+from .vistas import VistaCategoria, VistaCategorias, VistaLogIn, VistaSignIn, VistaTarea, VistaUsuario, VistaTareasUsuario, VistaTareasCategoria
+from flask_jwt_extended import JWTManager
 
 app = create_app('default')
 app_context = app.app_context()
@@ -18,6 +20,8 @@ api.add_resource(VistaSignIn, '/signin')
 api.add_resource(VistaUsuario, '/usuario/<int:id_usuario>')
 api.add_resource(VistaLogIn, '/login')
 api.add_resource(VistaTarea, '/tarea/<int:id_tarea>')
+api.add_resource(VistaTareasUsuario, '/usuario/<int:id_usuario>/tareas')
+api.add_resource(VistaTareasCategoria, '/categoria/<int:id_categoria>/tareas')
 
-# api.add_resource(VistaCancionesAlbum, '/album/<int:id_album>/canciones')
-# api.add_resource(VistaAlbumsUsuario, '/usuario/<int:id_usuario>/albumes')
+
+jwt = JWTManager(app)

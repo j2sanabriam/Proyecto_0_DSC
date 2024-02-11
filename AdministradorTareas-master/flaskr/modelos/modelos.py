@@ -10,11 +10,20 @@ class Categoria(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     nombre = db.Column(db.String(120))
     descripcion = db.Column(db.String(500))
+    tareas = db.relationship('Tarea', cascade='all, delete, delete-orphan')
 
 class Estado(enum.Enum):
     No_Iniciada = 1
     En_Curso = 2
     Finalizada = 3
+
+class Usuario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50))
+    contrasena = db.Column(db.String(50))
+    imagen = db.Column(db.String(250))
+    tareas = db.relationship('Tarea', cascade='all, delete, delete-orphan')
+
 
 class Tarea(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -25,13 +34,6 @@ class Tarea(db.Model):
     categoria = db.Column(db.Integer, db.ForeignKey("categoria.id"))
     usuario = db.Column(db.Integer, db.ForeignKey("usuario.id"))
 
-class Usuario(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(50))
-    contrasena = db.Column(db.String(50))
-    imagen = db.Column(db.String(250))
-    tareas = db.relationship('Tarea', cascade='all, delete, delete-orphan')
-    
 
 class EnumADiccionario(fields.Field):
     def _serialize(self, value, attr, obj, **kwargs):
@@ -46,7 +48,7 @@ class CategoriaSchema(SQLAlchemyAutoSchema):
         load_instance = True
 
 class TareaSchema(SQLAlchemyAutoSchema):
-    medio = EnumADiccionario(attribute=("medio"))
+    estado = EnumADiccionario(attribute=("estado"))
     class Meta:
          model = Tarea
          include_relationships = True
