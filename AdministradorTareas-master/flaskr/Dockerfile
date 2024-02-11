@@ -12,18 +12,21 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # Set environment variables
+# **localhost**
 # ENV FLASK_APP=""
 # ENV FLASK_DEBUG=1
+# **uvicorn**
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Expose port 5000 for the Flask development server to listen on
+# **localhost**
 # EXPOSE 5000
+# **uvicorn**
 EXPOSE 8000
 
 # Define the command to run the Flask development server
+# **localhost**
 # CMD ["flask", "run", "--host=0.0.0.0"]
-# ENTRYPOINT FLASK_APP=/opt/flaskr/app.py flask run -h 0.0.0.0
-# CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
-# CMD ["uvicorn", "app.app:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
-CMD uvicorn flask:create_app --host 0.0.0.0 --port 8000
+# **uvicorn**
+CMD uvicorn main:create_app --host 0.0.0.0 --port 8000
