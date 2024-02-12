@@ -85,7 +85,8 @@ class VistaTarea(Resource):
     def put(self, id_tarea):
         tarea = Tarea.query.get_or_404(id_tarea)
         tarea.texto = request.json.get("texto", tarea.texto)
-        tarea.fecha_fin = request.json.get("fecha_fin", tarea.fecha_fin)
+        # tarea.fecha_fin = request.json.get("fecha_fin", tarea.fecha_fin)
+        tarea.fecha_fin = datetime.strptime(request.json["fecha_fin"], '%Y-%m-%d').date()
         tarea.estado = request.json.get("estado", tarea.estado)
         db.session.commit()
         return tarea_schema.dump(tarea)
